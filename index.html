@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bubble — Accountability that actually works</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sky: #A8D8EA; --foam: #E0F4FF; --irid2: #D4B8FF; --irid3: #B8FFE8;
+    --pop: #7EC8E3; --deep: #2A6B8A; --accent: #FF8FAB; --green: #3DDBA0;
+    --text: #0F2A36; --muted: #5A8FA0; --bg: #F0FAFF; --card-border: rgba(126,200,227,0.25);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+  body::before { content:''; position:fixed; top:-200px; right:-200px; width:600px; height:600px; background:radial-gradient(circle,rgba(184,232,255,0.4) 0%,rgba(212,184,255,0.2) 50%,transparent 70%); border-radius:50%; pointer-events:none; z-index:0; }
+  body::after { content:''; position:fixed; bottom:-150px; left:-150px; width:500px; height:500px; background:radial-gradient(circle,rgba(184,255,232,0.35) 0%,rgba(168,216,234,0.2) 50%,transparent 70%); border-radius:50%; pointer-events:none; z-index:0; }
+
+  nav { display:flex; justify-content:space-between; align-items:center; padding:1.25rem 2rem; background:rgba(240,250,255,0.85); backdrop-filter:blur(16px); position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(168,216,234,0.3); }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; background:linear-gradient(135deg,#7EC8E3,#B8A8FF,#7EDDB3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.5px; }
+  .logo-dot { display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%; margin-left:2px; vertical-align:middle; margin-bottom:4px; }
+  .nav-cta { background:linear-gradient(135deg,#7EC8E3,#B8A8FF); color:white; border:none; padding:0.5rem 1.25rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:500; cursor:pointer; transition:transform 0.15s,opacity 0.15s; }
+  .nav-cta:hover { opacity:0.9; transform:translateY(-1px); }
+
+  .hero { max-width:600px; margin:0 auto; padding:4rem 2rem 3rem; text-align:center; position:relative; z-index:1; }
+  .badge { display:inline-flex; align-items:center; gap:6px; background:rgba(184,232,255,0.4); color:var(--deep); font-size:0.8rem; font-weight:500; padding:0.35rem 0.85rem; border-radius:100px; margin-bottom:1.5rem; border:1px solid rgba(126,200,227,0.4); }
+  .badge-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.7)} }
+
+  h1 { font-family:'Syne',sans-serif; font-size:2.6rem; font-weight:800; line-height:1.2; letter-spacing:-1px; color:var(--text); margin-bottom:1.25rem; word-break:break-word; }
+  h1 .highlight { background:linear-gradient(135deg,#7EC8E3,#B8A8FF,#7EDDB3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .subtitle { font-size:1rem; color:var(--muted); line-height:1.7; max-width:440px; margin:0 auto 2rem; font-weight:300; }
+
+  /* Mailchimp form styled to match site */
+  #mc_embed_signup { background:transparent !important; width:100% !important; }
+  #mc_embed_signup form { padding:0 !important; }
+  .waitlist-row { display:flex; gap:10px; max-width:400px; margin:0 auto 0.75rem; }
+  #mce-EMAIL { flex:1; min-width:0; padding:0.8rem 1.1rem; border:1.5px solid rgba(126,200,227,0.4); border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.875rem; background:rgba(255,255,255,0.7); color:var(--text); outline:none; }
+  #mce-EMAIL:focus { border-color:var(--pop); }
+  #mce-EMAIL::placeholder { color:#A0C8D8; }
+  #mc-embedded-subscribe { flex-shrink:0; background:linear-gradient(135deg,#7EC8E3,#B8A8FF); color:white; border:none; padding:0.8rem 1.2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:500; cursor:pointer; white-space:nowrap; transition:transform 0.15s,opacity 0.15s; }
+  #mc-embedded-subscribe:hover { opacity:0.9; transform:translateY(-1px); }
+  #mce-responses { max-width:400px; margin:0 auto; }
+  #mce-error-response, #mce-success-response { font-size:0.8rem; padding:0.5rem 0; display:none; }
+  #mce-success-response { color:var(--green); }
+  #mce-error-response { color:var(--accent); }
+  .indicates-required, #mc_embed_signup h2, .mc-field-group label { display:none !important; }
+  div[aria-hidden="true"] { display:none !important; }
+
+  .social-proof { font-size:0.8rem; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:8px; margin-top:0.75rem; }
+  .avatars { display:flex; }
+  .avatar { width:24px; height:24px; border-radius:50%; border:2px solid var(--bg); margin-left:-6px; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:600; color:white; }
+  .avatar:first-child { margin-left:0; }
+  .a1{background:linear-gradient(135deg,#7EC8E3,#5AAEC9)} .a2{background:linear-gradient(135deg,#FF8FAB,#FF6B8B)} .a3{background:linear-gradient(135deg,#3DDBA0,#2AB888)} .a4{background:linear-gradient(135deg,#B8A8FF,#9888EE)}
+
+  .floating-bubbles { position:relative; height:40px; margin:1rem 0; }
+  .bubble-float { position:absolute; border-radius:50%; animation:floatUp 4s ease-in-out infinite; opacity:0.5; }
+  .bf1{width:12px;height:12px;background:rgba(126,200,227,0.4);left:20%;animation-delay:0s;border:1px solid rgba(126,200,227,0.6);}
+  .bf2{width:18px;height:18px;background:rgba(184,168,255,0.3);left:45%;animation-delay:0.8s;border:1px solid rgba(184,168,255,0.5);}
+  .bf3{width:10px;height:10px;background:rgba(126,221,179,0.4);left:70%;animation-delay:1.6s;border:1px solid rgba(126,221,179,0.6);}
+  .bf4{width:14px;height:14px;background:rgba(255,143,171,0.3);left:85%;animation-delay:0.4s;border:1px solid rgba(255,143,171,0.5);}
+  @keyframes floatUp { 0%{transform:translateY(0);opacity:0.5}50%{transform:translateY(-20px);opacity:0.8}100%{transform:translateY(0);opacity:0.5} }
+
+  .preview { max-width:700px; margin:2rem auto; padding:0 2rem; position:relative; z-index:1; }
+  .phone-mockup { background:rgba(255,255,255,0.8); border-radius:24px; border:1.5px solid rgba(126,200,227,0.3); padding:1.25rem; max-width:300px; margin:0 auto; backdrop-filter:blur(12px); }
+  .mock-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+  .mock-tabs { display:flex; gap:3px; background:rgba(168,216,234,0.2); padding:3px; border-radius:100px; }
+  .mock-tab { padding:4px 10px; border-radius:100px; font-size:11px; font-weight:500; color:var(--muted); }
+  .mock-tab.active { background:linear-gradient(135deg,#7EC8E3,#B8A8FF); color:white; }
+  .mock-avatar { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#B8E8FF,#D4B8FF); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--deep); font-weight:600; }
+  .feed-label { font-size:10px; font-weight:600; color:var(--muted); margin-bottom:8px; letter-spacing:0.5px; text-transform:uppercase; }
+  .feed-item { display:flex; flex-direction:column; gap:5px; padding:10px; background:rgba(168,216,234,0.12); border-radius:12px; margin-bottom:8px; border:1px solid rgba(126,200,227,0.15); }
+  .feed-user { display:flex; align-items:center; gap:7px; }
+  .feed-avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; }
+  .feed-name { font-size:11px; font-weight:500; color:var(--text); }
+  .feed-time { font-size:10px; color:var(--muted); margin-left:auto; }
+  .feed-task { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.8); border:1px solid rgba(126,200,227,0.3); border-radius:100px; padding:3px 8px; font-size:11px; font-weight:500; color:var(--text); }
+  .check-dot { width:13px; height:13px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:7px; color:white; flex-shrink:0; }
+  .feed-note { font-size:10px; color:var(--muted); }
+  .reactions { display:flex; gap:5px; }
+  .reaction { background:rgba(255,255,255,0.7); border:1px solid rgba(126,200,227,0.25); border-radius:100px; padding:2px 7px; font-size:10px; color:var(--text); }
+  .streak-badge { display:inline-flex; align-items:center; background:rgba(255,143,171,0.15); color:#E05A7A; font-size:10px; font-weight:600; padding:2px 7px; border-radius:100px; }
+
+  .features { max-width:700px; margin:0 auto; padding:1rem 2rem 4rem; position:relative; z-index:1; }
+  .features-title { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:700; text-align:center; margin-bottom:1.5rem; color:var(--text); }
+  .features-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .feature-card { background:rgba(255,255,255,0.7); border:1.5px solid rgba(126,200,227,0.25); border-radius:14px; padding:1rem; backdrop-filter:blur(8px); transition:transform 0.2s; }
+  .feature-card:hover { transform:translateY(-3px); }
+  .feature-icon { font-size:20px; margin-bottom:0.5rem; }
+  .feature-name { font-family:'Syne',sans-serif; font-size:0.875rem; font-weight:700; margin-bottom:0.25rem; color:var(--text); }
+  .feature-desc { font-size:0.75rem; color:var(--muted); line-height:1.5; }
+
+  .cta-section { background:linear-gradient(135deg,#A8D8EA,#D4B8FF,#B8FFE8); padding:3rem 2rem; text-align:center; position:relative; z-index:1; }
+  .cta-section h2 { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800; color:var(--text); margin-bottom:0.5rem; }
+  .cta-section p { color:var(--deep); margin-bottom:1.5rem; font-size:0.95rem; opacity:0.8; }
+  .cta-row { display:flex; gap:10px; max-width:380px; margin:0 auto; }
+  .cta-email { flex:1; min-width:0; padding:0.8rem 1.1rem; border:none; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.875rem; background:rgba(255,255,255,0.7); color:var(--text); outline:none; }
+  .cta-btn { flex-shrink:0; background:var(--deep); color:white; border:none; padding:0.8rem 1.2rem; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:600; cursor:pointer; white-space:nowrap; }
+  #cta-success { display:none; color:var(--deep); font-size:0.875rem; margin-top:0.75rem; font-weight:600; }
+
+  footer { text-align:center; padding:1.5rem; font-size:0.8rem; color:var(--muted); border-top:1px solid rgba(126,200,227,0.2); position:relative; z-index:1; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">bubble<span class="logo-dot"></span></div>
+  <button class="nav-cta" onclick="document.getElementById('mce-EMAIL').focus()">Join waitlist</button>
+</nav>
+
+<section class="hero">
+  <div class="badge"><div class="badge-dot"></div>Coming soon to iOS</div>
+  <h1>Accountability that <span class="highlight">actually works</span></h1>
+  <p class="subtitle">Bubble lets you create a shared accountability group with your people — called a Bubble. Set goals, track habits, and celebrate wins together.</p>
+
+  <!-- Mailchimp Embedded Form -->
+  <div id="mc_embed_signup">
+    <form action="https://gmail.us10.list-manage.com/subscribe/post?u=9903c90f71aba9e8b92ae4be8&amp;id=23150b1ad0&amp;f_id=004893e3f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" target="_blank">
+      <div id="mc_embed_signup_scroll">
+        <div class="waitlist-row">
+          <input type="email" name="EMAIL" id="mce-EMAIL" placeholder="your@email.com" required>
+          <div aria-hidden="true" style="position:absolute;left:-5000px;"><input type="text" name="b_9903c90f71aba9e8b92ae4be8_23150b1ad0" tabindex="-1" value=""></div>
+          <input type="submit" value="Get early access" name="subscribe" id="mc-embedded-subscribe">
+        </div>
+        <div id="mce-responses">
+          <div id="mce-error-response"></div>
+          <div id="mce-success-response"></div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="social-proof">
+    <div class="avatars">
+      <div class="avatar a1">A</div><div class="avatar a2">S</div><div class="avatar a3">M</div><div class="avatar a4">J</div>
+    </div>
+    <span>Join 240+ people on the waitlist</span>
+  </div>
+  <div class="floating-bubbles">
+    <div class="bubble-float bf1"></div><div class="bubble-float bf2"></div>
+    <div class="bubble-float bf3"></div><div class="bubble-float bf4"></div>
+  </div>
+</section>
+
+<div class="preview">
+  <div class="phone-mockup">
+    <div class="mock-header">
+      <div class="mock-tabs">
+        <div class="mock-tab">You</div><div class="mock-tab active">Social</div><div class="mock-tab">News</div>
+      </div>
+      <div class="mock-avatar">A</div>
+    </div>
+    <div class="feed-label">Morning Warriors · Today</div>
+    <div class="feed-item">
+      <div class="feed-user">
+        <div class="feed-avatar" style="background:linear-gradient(135deg,#7EC8E3,#5AAEC9);">S</div>
+        <div><div class="feed-name">Sarah Mitchell</div></div>
+        <div class="feed-time">2h ago</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <div class="feed-task"><div class="check-dot">✓</div>Morning run</div>
+        <div class="streak-badge">🔥 7</div>
+      </div>
+      <div class="feed-note">5K in 28 min — new personal best!</div>
+      <div class="reactions"><div class="reaction">🔥 3</div><div class="reaction">👏 2</div><div class="reaction">💪</div></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-user">
+        <div class="feed-avatar" style="background:linear-gradient(135deg,#FF8FAB,#FF6B8B);">M</div>
+        <div><div class="feed-name">Marcus Davis</div></div>
+        <div class="feed-time">4h ago</div>
+      </div>
+      <div class="feed-task"><div class="check-dot">✓</div>Study session</div>
+      <div class="feed-note">2 hrs of Calc 2 done 📚</div>
+      <div class="reactions"><div class="reaction">👏 5</div><div class="reaction">💪 1</div></div>
+    </div>
+  </div>
+</div>
+
+<section class="features">
+  <h2 class="features-title">Everything your Bubble needs</h2>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">🫧</div><div class="feature-name">Your Bubble</div><div class="feature-desc">Create a private accountability group with friends, teammates, or your study squad.</div></div>
+    <div class="feature-card"><div class="feature-icon">🔥</div><div class="feature-name">Streaks</div><div class="feature-desc">Build momentum with habit streaks. Your Bubble celebrates every milestone.</div></div>
+    <div class="feature-card"><div class="feature-icon">✅</div><div class="feature-name">Check-ins</div><div class="feature-desc">Mark tasks complete and post to your Bubble's feed. Reactions keep energy high.</div></div>
+    <div class="feature-card"><div class="feature-icon">👊</div><div class="feature-name">Nudges</div><div class="feature-desc">Send a friendly push to someone in your Bubble once per day.</div></div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Be the first in your Bubble</h2>
+  <p>Launching on iOS soon. Get early access + 6 months free premium.</p>
+  <div class="cta-row">
+    <input type="email" id="cta-email" class="cta-email" placeholder="your@email.com" />
+    <button class="cta-btn" onclick="ctaSignup()">Notify me</button>
+  </div>
+  <p id="cta-success">🎉 You're on the list! Talk soon.</p>
+</section>
+
+<footer>© 2026 Bubble · Made with love at UCF 🧡</footer>
+
+<script src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+<script>
+(function($) {
+  window.fnames = new Array(); window.ftypes = new Array();
+  fnames[0]='EMAIL'; ftypes[0]='email';
+}(jQuery));
+var $mcj = jQuery.noConflict(true);
+
+function ctaSignup() {
+  const email = document.getElementById('cta-email').value;
+  if (!email || !email.includes('@')) {
+    document.getElementById('cta-email').style.borderColor = '#FF8FAB';
+    setTimeout(() => document.getElementById('cta-email').style.borderColor = '', 1500);
+    return;
+  }
+  document.getElementById('mce-EMAIL').value = email;
+  document.getElementById('mc-embedded-subscribe-form').submit();
+  document.getElementById('cta-email').style.display = 'none';
+  document.querySelector('.cta-btn').style.display = 'none';
+  document.getElementById('cta-success').style.display = 'block';
+}
+</script>
+</body>
+</html>
